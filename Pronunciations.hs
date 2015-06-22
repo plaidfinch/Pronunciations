@@ -47,7 +47,7 @@ import GHC.Generics ( Generic )
 
 import System.IO
 
-import Prelude hiding ( takeWhile , mapM )
+import Prelude hiding ( takeWhile , mapM , Word )
 
 homophonesUsing :: Pronunciations -> Word -> Maybe (Set Word)
 homophonesUsing dict =
