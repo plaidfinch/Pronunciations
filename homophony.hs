@@ -16,6 +16,8 @@ import Data.List
 import Control.Monad.Loops
 import qualified Data.Set as Set
 
+import Prelude hiding (Word)
+
 -- TODO: Make more UNIX-y, by talking to stderr, being more silent (take an --interactive flag?)
 
 main :: IO ()
