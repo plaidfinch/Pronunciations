@@ -5,9 +5,9 @@ description:         Please see README.md
 homepage:            http://github.com/bitemyapp/pronunciations#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Chris Allen
+author:              Kenneth Foner
 maintainer:          cma@bitemyapp.com
-copyright:           2015, Chris Allen
+copyright:           2015, Kenneth Foner
 category:            Web
 build-type:          Simple
 -- extra-source-files:
