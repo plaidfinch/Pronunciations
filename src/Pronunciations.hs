@@ -5,7 +5,7 @@
 
 module Pronunciations
    ( homophonesUsing
-   , Pronunciations
+   , Pronunciations(..)
    , pronounceUsing
    , spellUsing
    , pronunciations
@@ -54,8 +54,9 @@ homophonesUsing dict =
    fmap Set.unions . mapM (spellUsing dict) . Set.toList <=< pronounceUsing dict
 
 data Pronunciations =
-   Pronunciations !(Map Word (Set Pronunciation))
-                  !(Map Pronunciation (Set Word))
+  Pronunciations { wordToPronunciationsMap :: !(Map Word (Set Pronunciation))
+                 , pronunciationToWordsMap :: !(Map Pronunciation (Set Word))
+                 }
 
 pronounceUsing :: Pronunciations -> Word -> Maybe (Set Pronunciation)
 pronounceUsing (Pronunciations dict _) spelling = Map.lookup spelling dict
@@ -155,9 +156,9 @@ consonant =  "B"  $> B  <|> "CH" $> CH <|> "DH" $> DH <|> "D"  $> D  <|> "F"  $>
          <|> "SH" $> SH <|> "S"  $> S  <|> "TH" $> TH <|> "T"  $> T  <|> "V"  $> V
          <|> "W"  $> W  <|> "Y"  $> Y  <|> "ZH" $> ZH <|> "Z"  $> Z
 
-data Consonant = B  | CH | D  | DH | F 
-               | G  | HH | JH | K  | L 
-               | M  | N  | NG | P  | R 
-               | S  | SH | T  | TH | V 
+data Consonant = B  | CH | D  | DH | F
+               | G  | HH | JH | K  | L
+               | M  | N  | NG | P  | R
+               | S  | SH | T  | TH | V
                | W  | Y  | Z  | ZH
                deriving (Eq, Ord, Show, Generic)
