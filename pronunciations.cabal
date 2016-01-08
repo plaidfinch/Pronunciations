@@ -6,7 +6,7 @@ homepage:            http://github.com/bitemyapp/pronunciations#readme
 license:             BSD3
 license-file:        LICENSE
 author:              Kenneth Foner
-maintainer:          cma@bitemyapp.com
+maintainer:          michaelhueschen@gmail.com
 copyright:           2015, Kenneth Foner
 category:            Web
 build-type:          Simple
@@ -57,4 +57,4 @@ test-suite tests
 
 source-repository head
   type:     git
-  location: https://github.com/bitemyapp/pronunciations
+  location: https://github.com/kwf/Pronunciations
