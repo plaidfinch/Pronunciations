@@ -45,32 +45,6 @@ findCandidates dict word1 word1Drop word2Drop reqOverlap minPortAdded = do
 
      in (show (toList word1P), Set.unions wordSets)
 
-
-portInfix :: String -> Int -> Int -> [String] -> [String]
-portInfix seed nTails len ws = if len > seedLen
-                           then error "len is too long!"
-                           else catMaybes ps
-  where
-    seedLen = length seed
-    (prefix,suffix) = splitAt (seedLen-len) seed
-    matches w = if (take len w) == suffix
-                   then Just $ prefix ++ w
-                   else Nothing
-    ps = map matches (concatMap (nTailsOfMinLen nTails len) ws)
-
-
-nTailsOfMinLen :: Int -> Int -> [a] -> [[a]]
-nTailsOfMinLen n len xs = take (n `min` (xsLen - len + 1)) (tails xs)
-  where
-    xsLen = length xs
-
 for :: [a] -> (a -> b) -> [b]
 for = flip map
 
--- main :: IO ()
--- main = do
---   [word,len,minPortAdded,nTails] <- getArgs
---   prts <- portInfix word (read nTails) (read len) <$> englishWords
---   let isMinLen xs = (length word + (read minPortAdded)) < length xs
---       clean = sortBy (compare `on` length) . dedup . filter isMinLen
---   mapM_ putStrLn (clean prts)
