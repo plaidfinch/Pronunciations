@@ -38,7 +38,7 @@ main = do
   opts <- foldl (>>=) (return defaultOptions) actions
 
   -- check positional arguments
-  [dictFilename, word1] <- case length posArgs of
+  [dictFilename, inputWord] <- case length posArgs of
     2 -> return posArgs
     _ -> do
       hPutStrLn stderr $ "error: you must specify both the dictionary <DICT> "
@@ -57,11 +57,14 @@ main = do
 
   dict <- getPronunciations dictFilename
   let -- List of lists because we may have multiple different pronunciations
-      -- of word1.
-      maybeCandidates = findCandidates dict word1 word1Drop word2Drop reqOverlap minPortAdded
+      -- of inputWord.
+      candidateFinder = if optInputWord1 opts
+                           then findSuffixCandidates
+                           else findPrefixCandidates
+      maybeCandidates = candidateFinder dict inputWord word1Drop word2Drop reqOverlap minPortAdded
   case maybeCandidates of
     Nothing -> do
-      putStrLn $ "`" ++ word1 ++ "` is not in the dictionary :("
+      putStrLn $ "`" ++ inputWord ++ "` is not in the dictionary :("
       exitFailure
     Just candidates -> forM_ (zip [0..] candidates) $ \(idx,(pronounce,group)) -> do
       putStrLn (replicate 30 '-')
@@ -94,6 +97,7 @@ data Options = Options
   , optWord2Drop    :: Int
   , optOverlap      :: Int
   , optMinPortAdded :: Int
+  , optInputWord1   :: Bool
   }
 
 -- | Default options
@@ -102,6 +106,7 @@ defaultOptions = Options
   , optWord2Drop    = 0
   , optOverlap      = 0
   , optMinPortAdded = 0
+  , optInputWord1   = True
   }
 
 -- | A list of actions to take based on command line options present
@@ -114,7 +119,7 @@ options =
         (ReqArg
             (\arg opt -> return opt { optWord1Drop = read arg })
             "INT")
-        (unwords [ "phonemes dropped from <WORD>"
+        (unwords [ "phonemes dropped from word1"
                  , "\n", "[default ="
                  , show (optWord1Drop defaultOptions), "]"])
 
@@ -122,7 +127,7 @@ options =
         (ReqArg
             (\arg opt -> return opt { optWord2Drop = read arg })
             "INT")
-        (unwords [ "phonemes dropped from second (dictionary) word"
+        (unwords [ "phonemes dropped from word2"
                  , "\n", "[default ="
                  , show (optWord2Drop defaultOptions), "]"])
 
@@ -144,11 +149,28 @@ options =
                  , "\n", "[default ="
                  , show (optMinPortAdded defaultOptions), "]"])
 
+  , Option "r" []
+        (NoArg
+           (\opt -> return opt { optInputWord1 = False }))
+        "Set <WORD> to be word2 [default is word1]"
+
   , Option "h" ["help"]
         (NoArg
             (\_ -> do
                 prg <- getProgName
-                let header = prg ++ " <DICT> <WORD> [OPTIONS]"
+                let header = unlines [ usage, bar, blurb, figure ]
+                    bar    = replicate 10 '-'
+                    usage  = prg ++ " <DICT> <WORD> [OPTIONS]"
+                    blurb  =
+                      unwords [ "We define word1 as the word that comes first"
+                              , "and word2 as the word that comes second."
+                              , "<WORD> defaults to word1 but can be switched"
+                              , "to be word2 for portmanteaus in the \"other direction\". " ]
+                    figure =
+                      unlines [ "Diagram of portmanteau:"
+                              , "          [word1_body][word1drop]"
+                              , "             [overlap]"
+                              , "  [word2drop][word2_body]" ]
                 hPutStrLn stderr (usageInfo header options)
                 exitSuccess))
         "Show help"
