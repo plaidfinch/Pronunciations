@@ -18,16 +18,16 @@ import           System.Environment (getArgs)
 
 import Pronunciations
 
-import Debug.Trace
-
-findCandidates :: Pronunciations
-               -> String
-               -> Int
-               -> Int
-               -> Int
-               -> Int
-               -> Maybe [(String, Set Word)]
-findCandidates dict word1 word1Drop word2Drop reqOverlap minPortAdded = do
+-- This finds words which could be "suffixed" onto the input word to form a portmanteau
+-- e.g. given "swole" it might return "wholesome" -> "swolesome"
+findSuffixCandidates :: Pronunciations
+                     -> String
+                     -> Int
+                     -> Int
+                     -> Int
+                     -> Int
+                     -> Maybe [(String, Set Word)]
+findSuffixCandidates dict word1 word1Drop word2Drop reqOverlap minPortAdded = do
   let text = T.toUpper (T.pack word1)
   word1Ps <- pronounceUsing dict (Word text)
   return $ for (Set.toList word1Ps) $ \word1P ->
@@ -44,6 +44,34 @@ findCandidates dict word1 word1Drop word2Drop reqOverlap minPortAdded = do
                  else Set.empty
 
      in (show (toList word1P), Set.unions wordSets)
+
+-- This finds words which could be "prefixed" onto the input word to form a portmanteau
+-- e.g. given "poltergeist" it might return "apropos" -> "apropoltergeist"
+findPrefixCandidates :: Pronunciations
+                     -> String
+                     -> Int
+                     -> Int
+                     -> Int
+                     -> Int
+                     -> Maybe [(String, Set Word)]
+findPrefixCandidates dict word2 word1Drop word2Drop reqOverlap minPortAdded = do
+  let text = T.toUpper (T.pack word2)
+  word2Ps <- pronounceUsing dict (Word text)
+  return $ for (Set.toList word2Ps) $ \word2P ->
+    let overlap =  Seq.take reqOverlap (Seq.drop word2Drop word2P)
+        pToWAssocs = Map.assocs (pronunciationToWordsMap dict)
+        wordSets :: [Set Word]
+        wordSets = for pToWAssocs $ \(word1P,word1Spellings) ->
+          let len = Seq.length word1P
+              droppedWord1P = Seq.drop (len - (reqOverlap + word1Drop)) word1P
+              isMatch = (Seq.length droppedWord1P - reqOverlap >= minPortAdded)
+                     && (Seq.take reqOverlap droppedWord1P == overlap)
+           in if isMatch
+                 then word1Spellings
+                 else Set.empty
+
+     in (show (toList word2P), Set.unions wordSets)
+
 
 for :: [a] -> (a -> b) -> [b]
 for = flip map
