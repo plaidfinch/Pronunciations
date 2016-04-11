@@ -30,7 +30,7 @@ main = do
   -- Parse command line --------------------------------------------------
 
   -- Parse command line, getting a list of option actions and positional
-  -- arguments. The 'Premute' value instructs getOpt to allow options and
+  -- arguments. The 'Permute' value instructs getOpt to allow options and
   -- non-option (positional args) to be freely interspersed.
   (actions, posArgs, errors) <- getOpt Permute options <$> getArgs
 
@@ -138,7 +138,9 @@ options =
         (ReqArg
             (\arg opt -> return opt { optMinPortAdded = read arg })
             "INT")
-        (unwords [ "mysterious option, to be described by MH"
+        (unwords [ "required minimum number of phonemes added to <WORD>"
+                 , "in final portmanteau"
+                 , "(this can be used to filter out short words)"
                  , "\n", "[default ="
                  , show (optMinPortAdded defaultOptions), "]"])
 
